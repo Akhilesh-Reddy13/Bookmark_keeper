@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import Bookmark from '../models/Bookmark.js';
 import User from '../models/user.js';
+
 const router=express.Router();
 
 const secretKey='hsbfjbfdnXCGERG';
@@ -11,8 +12,13 @@ const authenicateJwt=(req,res,next)=>{
     const authHeader=req.headers.authorization;
     if(authHeader){
         const token= authHeader.split(' ')[1];
+        if(!secretKey){
+            console.error('Secret key is not defined');
+            return res.status(500).json({message:'Server Configuration error'});
+        }
         jwt.verify(token,secretKey,(err,user)=>{
             if(err){
+                console.error('JWT verification error:',err);
                 return res.sendStatus(403);
             }
             req.user=user;
@@ -56,12 +62,28 @@ router.post('/users/login',async(req,res)=>{
 });
 
 router.get('/',authenicateJwt,async (req,res) =>{
-    const bookmarks = await Bookmark.find();
+    try{
+    const user= await User.findOne({username:req.user.username});
+    if(!user){
+        return res.status(404).json({message:"User not found"});
+    }
+    const bookmarks= await Bookmark.find({_id:{$in: user.addedBookmarks}});
     res.json(bookmarks);
+    }catch(error){
+        console.error("Error fetching bookmarks:",error);
+        res.status(500).json({message:'Failed to fetch bookmarks'});
+    }
 });
 
 router.get('/:id',authenicateJwt,async (req,res)=>{
    try {
+        const user=await User.findOne({username:req.user.username});
+        if(!user){
+            return res.status(404).json({message:"User not found"});
+        }
+        if(!user.addedBookmarks.includes(req.params.id)){
+            return res.status(403).json({message:"Access denied: Not your bookmark"});
+        }
         const bookmark = await Bookmark.findById(req.params.id);
         if (!bookmark) {
             return res.status(404).json({ message: 'Bookmark not found' });
@@ -78,13 +100,30 @@ router.get('/:id',authenicateJwt,async (req,res)=>{
 });
 
 router.post('/',authenicateJwt,async (req,res)=>{
-    const newBookmark= new Bookmark(req.body);
-    await newBookmark.save();
-    res.status(201).json(newBookmark);
+    try{
+     const newBookmark= new Bookmark(
+        {...req.body,
+        owner:req.user.username
+    });
+
+    const savedBookmark=await newBookmark.save();
+    await User.findOneAndUpdate(
+        {username:req.user.username},
+        {$push:{addedBookmarks: savedBookmark._id}});
+    res.status(201).json(savedBookmark);
+    }catch (error) {
+        console.error('Error creating bookmark:', error);
+        res.status(500).json({ message: 'Failed to create bookmark' });
+    }
 });
 
 router.put('/:id',authenicateJwt, async (req, res) => {
   try {
+     const user = await User.findOne({ username: req.user.username });
+    
+     if (!user.addedBookmarks.includes(req.params.id)){
+            return res.status(403).json({ message: 'Access denied: Not your bookmark' });
+    }
     const updatedBookmark = await Bookmark.findByIdAndUpdate(
       req.params.id,
       req.body,
@@ -101,10 +140,20 @@ router.put('/:id',authenicateJwt, async (req, res) => {
 
 router.delete('/:id',authenicateJwt, async (req,res) =>{
     try{
+    const user = await User.findOne({ username: req.user.username });
+        
+    if (!user.addedBookmarks.includes(req.params.id)) {
+            return res.status(403).json({ message: 'Access denied: Not your bookmark' });
+    }
     const deletedBookmark=await Bookmark.findByIdAndDelete(req.params.id);
+
     if(!deletedBookmark){
         return res.status(404).json({message:"Bookmark not found"});
     }
+    await User.findOneAndUpdate(
+            { username: req.user.username },
+            { $pull: { addedBookmarks: req.params.id } }
+    );
     res.json({message:'Bookmark Deleted'});
     }
     catch(error){
