@@ -1,5 +1,6 @@
 import express from "express";
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 import Bookmark from '../models/Bookmark.js';
 import User from '../models/user.js';
 const router=express.Router();
@@ -30,7 +31,8 @@ router.post('/users/signup',async (req,res)=>{
         res.status(403).json({message:'User already exists'});
     }
     else{
-        const newUser=new User({username,password});
+        const hpassword= await bcrypt.hash(password,10);
+        const newUser=new User({username,password:hpassword});
         await newUser.save();
         const token=jwt.sign({username,role:'user'},secretKey,{expiresIn:'1h'});
         res.json({message:'User created successfully',token});
@@ -43,8 +45,8 @@ router.post('/users/signup',async (req,res)=>{
 
 router.post('/users/login',async(req,res)=>{
     const {username,password}=req.headers;
-    const user=await User.findOne({username,password});
-    if(user){
+    const user=await User.findOne({username});
+    if(user && await bcrypt.compare(password,user.password)){
         const token=jwt.sign({username,role:'user'},secretKey,{expiresIn:'1h'});
         res.json({message:'Logged in succesfully',token});
     }
@@ -75,7 +77,7 @@ router.get('/:id',authenicateJwt,async (req,res)=>{
     }
 });
 
-router.post('/',async (req,res)=>{
+router.post('/',authenicateJwt,async (req,res)=>{
     const newBookmark= new Bookmark(req.body);
     await newBookmark.save();
     res.status(201).json(newBookmark);
