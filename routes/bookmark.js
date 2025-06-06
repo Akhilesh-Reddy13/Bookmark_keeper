@@ -3,10 +3,12 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import Bookmark from '../models/Bookmark.js';
 import User from '../models/user.js';
+import dotenv from 'dotenv';
 
+dotenv.config();
 const router=express.Router();
 
-const secretKey='hsbfjbfdnXCGERG';
+const secretKey=process.env.JWT_KEY;
 
 const authenicateJwt=(req,res,next)=>{
     const authHeader=req.headers.authorization;
