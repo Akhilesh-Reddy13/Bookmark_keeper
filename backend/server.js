@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
-import bookroute from './routes/bookmark.js';
+import bookroute from './routes/bookmarkRoutes.js';
 import dotenv from 'dotenv';
 
 const app=express();
