@@ -42,7 +42,7 @@ JavaScript (Vanilla)
 5. Develop browser extension for easy bookmarking
 
  
-![Bookmark Manager](https://raw.githubusercontent.com/Akhilesh-Reddy13/bookmark_project/main/images/p1.png)
-(https://raw.githubusercontent.com/Akhilesh-Reddy13/bookmark_project/main/images/p2.png)
+![Bookmark Manager](./images/p1.png) 
+(./images/p2.png)
 
 
