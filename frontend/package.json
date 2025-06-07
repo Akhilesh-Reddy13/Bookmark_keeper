@@ -1,0 +1,11 @@
+{
+  "name": "bookmark-frontend",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "http-server public -p 8080",
+    "build": "mkdir -p public && cp src/* public/"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

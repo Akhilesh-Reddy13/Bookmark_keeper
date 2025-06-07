@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookmark Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <nav class="bg-white shadow-md p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-blue-600">Bookmark Manager</h1>
+            <div id="auth-buttons">
+                <button id="signup-btn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mr-2">Sign Up</button>
+                <button id="login-btn" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Login</button>
+            </div>
+            <div id="user-info" class="hidden">
+                <span id="username-display" class="mr-4">Welcome, User</span>
+                <button id="logout-btn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Auth Forms -->
+    <div id="auth-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full">
+            <div id="signup-form" class="hidden">
+                <h2 class="text-2xl font-bold mb-4">Sign Up</h2>
+                <form>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="signup-username">
+                            Username
+                        </label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="signup-username" type="text" placeholder="Username">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="signup-password">
+                            Password
+                        </label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" id="signup-password" type="password" placeholder="******************">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <button id="submit-signup" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
+                            Sign Up
+                        </button>
+                        <button id="cancel-signup" class="text-gray-500 hover:text-gray-700" type="button">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div id="login-form" class="hidden">
+                <h2 class="text-2xl font-bold mb-4">Login</h2>
+                <form>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="login-username">
+                            Username
+                        </label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="login-username" type="text" placeholder="Username">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="login-password">
+                            Password
+                        </label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" id="login-password" type="password" placeholder="******************">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <button id="submit-login" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
+                            Login
+                        </button>
+                        <button id="cancel-login" class="text-gray-500 hover:text-gray-700" type="button">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <main class="container mx-auto p-4">
+        <!-- Main Content Area -->
+        <div id="content" class="mt-8">
+            <!-- Dashboard (shown when logged in) -->
+            <div id="dashboard" class="hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold">Your Bookmarks</h2>
+                    <div>
+                        <button id="get-bookmarks-btn" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded mr-2">Get Bookmarks</button>
+                        <button id="add-bookmark-btn" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded">Add Bookmark</button>
+                    </div>
+                </div>
+
+                <!-- Search by ID -->
+                <div class="mb-6 bg-white p-4 rounded shadow">
+                    <h3 class="font-medium mb-2">Find Bookmark by ID</h3>
+                    <div class="flex">
+                        <input type="text" id="bookmark-id-input" placeholder="Enter bookmark ID" class="border rounded-l px-3 py-2 flex-grow">
+                        <button id="get-bookmark-by-id-btn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-r">Find</button>
+                    </div>
+                </div>
+
+                <!-- Bookmarks List -->
+                <div id="bookmarks-container" class="space-y-4"></div>
+            </div>
+
+            <!-- Welcome Screen (shown when not logged in) -->
+            <div id="welcome-screen" class="text-center py-12">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Welcome to Bookmark Manager</h2>
+                <p class="text-xl text-gray-600 mb-8">Sign up or login to manage your bookmarks</p>
+                <div>
+                    <button id="welcome-signup-btn" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg text-lg mr-4">Sign Up</button>
+                    <button id="welcome-login-btn" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg text-lg">Login</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add/Edit Bookmark Modal -->
+    <div id="bookmark-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full">
+            <h2 id="bookmark-modal-title" class="text-2xl font-bold mb-4">Add Bookmark</h2>
+            <form id="bookmark-form">
+                <input type="hidden" id="bookmark-id">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="bookmark-title">
+                        Title
+                    </label>
+                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                           id="bookmark-title" type="text" placeholder="Bookmark Title">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="bookmark-url">
+                        URL
+                    </label>
+                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                           id="bookmark-url" type="url" placeholder="https://example.com">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="bookmark-description">
+                        Description
+                    </label>
+                    <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                              id="bookmark-description" placeholder="Bookmark Description" rows="3"></textarea>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="bookmark-tags">
+                        Tags (comma separated)
+                    </label>
+                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                           id="bookmark-tags" type="text" placeholder="tag1, tag2, tag3">
+                </div>
+                <div class="flex items-center justify-between">
+                    <button id="save-bookmark-btn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
+                        Save
+                    </button>
+                    <button id="cancel-bookmark-btn" class="text-gray-500 hover:text-gray-700" type="button">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
